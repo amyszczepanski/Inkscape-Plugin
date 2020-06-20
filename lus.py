@@ -22,4 +22,4 @@ import lus_parser_sender
 
 a = lus_parser_sender.LUS()
 
-a.affect()
+a.run()

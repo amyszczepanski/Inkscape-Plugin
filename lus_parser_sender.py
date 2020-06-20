@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from lxml import etree
 from bezmisc import *
 from math import sqrt
 from simpletransform import *
@@ -98,44 +99,44 @@ class LUS( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
 
-		self.OptionParser.add_option( "--smoothness",
-			action="store", type="float",
+		self.arg_parser.add_argument( "--smoothness",
+			type=float,
 			dest="smoothness", default=0.1,
 			help="Smoothness of curves" )
 
-		self.OptionParser.add_option( "--penDelay",
-			action="store", type="float",
+		self.arg_parser.add_argument( "--penDelay",
+			type=float,
 			dest="penDelay", default=N_PEN_DELAY,
 			help="Delay after pen lift/down (sec)" )
 
-		self.OptionParser.add_option( "--tab",
-			action="store", type="string",
+		self.arg_parser.add_argument( "--tab",
+			type=str,
 			dest="tab", default="controls",
 			help="The active tab when Apply was pressed" )
 
-		self.OptionParser.add_option( "--penUpPosition",
-			action="store", type="int",
+		self.arg_parser.add_argument( "--penUpPosition",
+			type=int,
 			dest="penUpPosition", default=N_PEN_UP_POS,
 			help="Position when lifted" )
 
-		self.OptionParser.add_option( "--penDownPosition",
-			action="store", type="int",
+		self.arg_parser.add_argument( "--penDownPosition",
+			type=int,
 			dest="penDownPosition", default=N_PEN_DOWN_POS,
 			help="Position when lowered" )
-		self.OptionParser.add_option( "--layernumber",
-			action="store", type="int",
+		self.arg_parser.add_argument( "--layernumber",
+			type=int,
 			dest="layernumber", default=N_DEFAULT_LAYER,
 			help="Selected layer for multilayer plotting" )
-		self.OptionParser.add_option( "--setupType",
-			action="store", type="string",
+		self.arg_parser.add_argument( "--setupType",
+			type=str,
 			dest="setupType", default="controls",
 			help="The active option when Apply was pressed" )
-		self.OptionParser.add_option( "--manualType",
-			action="store", type="string",
+		self.arg_parser.add_argument( "--manualType",
+			type=str,
 			dest="manualType", default="controls",
 			help="The active option when Apply was pressed" )
-		self.OptionParser.add_option( "--WalkDistance",
-			action="store", type="int",
+		self.arg_parser.add_argument( "--WalkDistance",
+			type=int,
 			dest="WalkDistance", default=N_WALK_DEFAULT,
 			help="Selected layer for multilayer plotting" )
 
@@ -247,7 +248,7 @@ class LUS( inkex.Effect ):
 		self.svgDataRead = False
 		self.recursiveLUSDataScan( self.svg )
 		if ( not self.svgDataRead ):    #if there is no lus data, add some:
-			luslayer = inkex.etree.SubElement( self.svg, 'lus' )
+			luslayer = etree.SubElement( self.svg, 'lus' )
 		
 			luslayer.set( 'layer', str( 0 ) )
 			luslayer.set( 'node', str( 0 ) )
