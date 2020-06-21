@@ -49,7 +49,7 @@ USER = os.getenv( 'USER' )
 if platform == 'win32':
 	HOME = os.path.realpath( "C:/" )  # Arguably, this should be %APPDATA% or %TEMP%
 
-Gcode_file =  os.path.join( HOME,'\lus-output.txt' )
+Gcode_file =  os.path.join( HOME,'lus-output.txt' )
 #Gcode_file =  os.path.join( HOME,'\\Users',USER,'\\Documents\\LineUsFiles\\0000007.txt' )
 
 #-----------------------------------------------------------------------------------------------------
@@ -101,20 +101,6 @@ class LUS( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
 
-		self.arg_parser = ArgumentParser(description="I do not even know")
-
-		self.arg_parser.add_argument(
-				"input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-				help="Filename of the input file (default is stdin)", default=None)
-
-		self.arg_parser.add_argument(
-				"--output", type=str, default=None,
-				help="Optional output filename for saving the result (default is stdout).")
-
-		self.arg_parser.add_argument(
-				"--ids", default=None,
-				help="I have no idea what this is.")
-            		
 		self.arg_parser.add_argument( "--smoothness",
 			type=float,
 			dest="smoothness", default=0.1,
@@ -160,6 +146,7 @@ class LUS( inkex.Effect ):
 			dest="WalkDistance", default=N_WALK_DEFAULT,
 			help="Selected layer for multilayer plotting" )
 
+
 		self.add_arguments(self.arg_parser)
 		
 		self.PenIsUp = True
@@ -196,12 +183,14 @@ class LUS( inkex.Effect ):
 	def effect( self ):
 		# Main entry
 
+
 		self.svg = self.document.getroot()
 		self.CheckSVGforLUSData()
 
 #____________	Output to Line-us here   ____________________________________
 
-		if self.options.tab == '"splash"':      # Plot
+
+		if self.options.tab == 'splash':      # Plot
 			self.LU = True
 			self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.connect()
@@ -212,13 +201,15 @@ class LUS( inkex.Effect ):
 			self.svgLayer = 12345;  # indicate that we are plotting all layers.
 			self.plotToLUS()
 
-		elif self.options.tab == '"manual"':
+		elif self.options.tab == 'manual':
 			self.LU = True
 			self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.connect()
 			self.manualCommand()
 
-		elif self.options.tab == '"layers"':
+
+
+		elif self.options.tab == 'layers':
 			self.LU = True
 			self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.connect()
@@ -240,7 +231,7 @@ class LUS( inkex.Effect ):
 
 #____________	Output to G-code file here   ____________________________________
 
-		elif self.options.tab == '"gcode"':    #G-code
+		elif self.options.tab == 'gcode':    #G-code
 			self.GF = True
 			self.fil = open(Gcode_file,'w')
 			self.fil.write( 'G54 X0 Y0 S1\n' )  # write header needed for Line-us
@@ -284,7 +275,7 @@ class LUS( inkex.Effect ):
 			for node in aNodeList:
 				if node.tag == 'svg':
 					self.recursiveLUSDataScan( node )
-				elif node.tag == inkex.addNS( 'botbot', 'svg' ) or node.tag == 'lus':
+				elif node.tag == inkex.utils.addNS( 'botbot', 'svg' ) or node.tag == 'lus':
 					
 					self.svgLayer = int( node.get( 'layer' ) )
 					self.svgNodeCount = int( node.get( 'node' ) )
@@ -307,7 +298,7 @@ class LUS( inkex.Effect ):
 			for node in aNodeList:
 				if node.tag == 'svg':
 					self.UpdateSVGLUSData( node )
-				elif node.tag == inkex.addNS( 'lus', 'svg' ) or node.tag == 'lus':
+				elif node.tag == inkex.utils.addNS( 'lus', 'svg' ) or node.tag == 'lus':
 					node.set( 'layer', str( self.svgLayer ) )
 					node.set( 'node', str( self.svgNodeCount ) )
 					node.set( 'lastpath', str( self.svgLastPath ) )
@@ -410,16 +401,16 @@ class LUS( inkex.Effect ):
 			# first apply the current matrix transform to this node's tranform
 			matNew = composeTransform( matCurrent, parseTransform( node.get( "transform" ) ) )
 
-			if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
+			if node.tag == inkex.utils.addNS( 'g', 'svg' ) or node.tag == 'g':
 				#self.penUp()
 
-				if ( node.get( inkex.addNS( 'groupmode', 'inkscape' ) ) == 'layer' ):
+				if ( node.get( inkex.utils.addNS( 'groupmode', 'inkscape' ) ) == 'layer' ):
 					if not self.allLayers:
-						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.addNS('label', 'inkscape')))
-						self.DoWePlotLayer( node.get( inkex.addNS( 'label', 'inkscape' ) ) )
+						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.utils.addNS('label', 'inkscape')))
+						self.DoWePlotLayer( node.get( inkex.utils.addNS( 'label', 'inkscape' ) ) )
 				self.recursivelyTraverseSvg( node, matNew, parent_visibility=v )
 
-			elif node.tag == inkex.addNS( 'use', 'svg' ) or node.tag == 'use':
+			elif node.tag == inkex.utils.addNS( 'use', 'svg' ) or node.tag == 'use':
 
 				# A <use> element refers to another SVG element via an xlink:href="#blah"
 				# attribute.  We will handle the element by doing an XPath search through
@@ -434,7 +425,7 @@ class LUS( inkex.Effect ):
 				#     for processing the referenced element.  The referenced element is
 				#     hidden only if its visibility is "inherit" or "hidden".
 
-				refid = node.get( inkex.addNS( 'href', 'xlink' ) )
+				refid = node.get( inkex.utils.addNS( 'href', 'xlink' ) )
 				if refid:
 					# [1:] to ignore leading '#' in reference
 					path = '//*[@id="%s"]' % refid[1:]
@@ -454,14 +445,14 @@ class LUS( inkex.Effect ):
 				else:
 					pass
 
-			elif node.tag == inkex.addNS( 'path', 'svg' ):
+			elif node.tag == inkex.utils.addNS( 'path', 'svg' ):
 
 				self.pathcount += 1
 				self.plotPath( node, matNew )				
 				self.svgLastPath += 1
 				self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS( 'rect', 'svg' ) or node.tag == 'rect':
+			elif node.tag == inkex.utils.addNS( 'rect', 'svg' ) or node.tag == 'rect':
 
 				# Manually transform
 				#
@@ -475,7 +466,7 @@ class LUS( inkex.Effect ):
 				# fourth side implicitly
 
 				# Create a path with the outline of the rectangle
-				newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
 				x = float( node.get( 'x' ) )
 				y = float( node.get( 'y' ) )
 				w = float( node.get( 'width' ) )
@@ -495,7 +486,7 @@ class LUS( inkex.Effect ):
 				newpath.set( 'd', simplepath.formatPath( a ) )
 				self.plotPath( newpath, matNew )
 
-			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
+			elif node.tag == inkex.utils.addNS( 'line', 'svg' ) or node.tag == 'line':
 
 				# Convert
 				#
@@ -508,7 +499,7 @@ class LUS( inkex.Effect ):
 				self.pathcount += 1
 
 				# Create a path to contain the line
-				newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
 				x1 = float( node.get( 'x1' ) )
 				y1 = float( node.get( 'y1' ) )
 				x2 = float( node.get( 'x2' ) )
@@ -527,7 +518,7 @@ class LUS( inkex.Effect ):
 				self.svgLastPath += 1
 				self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
+			elif node.tag == inkex.utils.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
 
 				# Convert
 				#
@@ -555,7 +546,7 @@ class LUS( inkex.Effect ):
 				d = "M " + pa[0]
 				for i in range( 1, len( pa ) ):
 					d += " L " + pa[i]
-				newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
 				newpath.set( 'd', d );
 				s = node.get( 'style' )
 				if s:
@@ -567,7 +558,7 @@ class LUS( inkex.Effect ):
 				self.svgLastPath += 1
 				self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
+			elif node.tag == inkex.utils.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
 
 				# Convert
 				#
@@ -596,7 +587,7 @@ class LUS( inkex.Effect ):
 				for i in range( 1, len( pa ) ):
 					d += " L " + pa[i]
 				d += " Z"
-				newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
 				newpath.set( 'd', d );
 				s = node.get( 'style' )
 				if s:
@@ -608,9 +599,9 @@ class LUS( inkex.Effect ):
 				self.svgLastPath += 1
 				self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS( 'ellipse', 'svg' ) or \
+			elif node.tag == inkex.utils.addNS( 'ellipse', 'svg' ) or \
 				node.tag == 'ellipse' or \
-				node.tag == inkex.addNS( 'circle', 'svg' ) or \
+				node.tag == inkex.utils.addNS( 'circle', 'svg' ) or \
 				node.tag == 'circle':
 
 					# Convert circles and ellipses to a path with two 180 degree arcs.
@@ -629,7 +620,7 @@ class LUS( inkex.Effect ):
 					#
 					# Note: ellipses or circles with a radius attribute of value 0 are ignored
 
-					if node.tag == inkex.addNS( 'ellipse', 'svg' ) or node.tag == 'ellipse':
+					if node.tag == inkex.utils.addNS( 'ellipse', 'svg' ) or node.tag == 'ellipse':
 						rx = float( node.get( 'rx', '0' ) )
 						ry = float( node.get( 'ry', '0' ) )
 					else:
@@ -649,7 +640,7 @@ class LUS( inkex.Effect ):
 						'0 1 0 %f,%f ' % ( x2, cy ) + \
 						'A %f,%f ' % ( rx, ry ) + \
 						'0 1 0 %f,%f' % ( x1, cy )
-					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+					newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
 					newpath.set( 'd', d );
 					s = node.get( 'style' )
 					if s:
@@ -660,19 +651,19 @@ class LUS( inkex.Effect ):
 					self.plotPath( newpath, matNew )					
 					self.svgLastPath += 1
 					self.svgLastPathNC = self.nodeCount
-			elif node.tag == inkex.addNS( 'metadata', 'svg' ) or node.tag == 'metadata':
+			elif node.tag == inkex.utils.addNS( 'metadata', 'svg' ) or node.tag == 'metadata':
 				pass
-			elif node.tag == inkex.addNS( 'defs', 'svg' ) or node.tag == 'defs':
+			elif node.tag == inkex.utils.addNS( 'defs', 'svg' ) or node.tag == 'defs':
 				pass
-			elif node.tag == inkex.addNS( 'namedview', 'sodipodi' ) or node.tag == 'namedview':
+			elif node.tag == inkex.utils.addNS( 'namedview', 'sodipodi' ) or node.tag == 'namedview':
 				pass
-			elif node.tag == inkex.addNS( 'lus', 'svg' ) or node.tag == 'lus':
+			elif node.tag == inkex.utils.addNS( 'lus', 'svg' ) or node.tag == 'lus':
 				pass
-			elif node.tag == inkex.addNS( 'title', 'svg' ) or node.tag == 'title':
+			elif node.tag == inkex.utils.addNS( 'title', 'svg' ) or node.tag == 'title':
 				pass
-			elif node.tag == inkex.addNS( 'desc', 'svg' ) or node.tag == 'desc':
+			elif node.tag == inkex.utils.addNS( 'desc', 'svg' ) or node.tag == 'desc':
 				pass
-			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
+			elif node.tag == inkex.utils.addNS( 'text', 'svg' ) or node.tag == 'text':
 				if not self.warnings.has_key( 'text' ):
 					inkex.errormsg( gettext.gettext( 'Warning: unable to draw text; ' +
 						'please convert it to a path first.  Consider using the ' +
@@ -680,7 +671,7 @@ class LUS( inkex.Effect ):
 						'"Render" category of extensions.' ) )
 					self.warnings['text'] = 1
 				pass
-			elif node.tag == inkex.addNS( 'image', 'svg' ) or node.tag == 'image':
+			elif node.tag == inkex.utils.addNS( 'image', 'svg' ) or node.tag == 'image':
 				if not self.warnings.has_key( 'image' ):
 					inkex.errormsg( gettext.gettext( 'Warning: unable to draw bitmap images; ' +
 						'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
@@ -688,21 +679,21 @@ class LUS( inkex.Effect ):
 						'cause cut-and-paste operations to paste in bitmap copies.' ) )
 					self.warnings['image'] = 1
 				pass
-			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
+			elif node.tag == inkex.utils.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
 				pass
-			elif node.tag == inkex.addNS( 'radialGradient', 'svg' ) or node.tag == 'radialGradient':
+			elif node.tag == inkex.utils.addNS( 'radialGradient', 'svg' ) or node.tag == 'radialGradient':
 				# Similar to pattern
 				pass
-			elif node.tag == inkex.addNS( 'linearGradient', 'svg' ) or node.tag == 'linearGradient':
+			elif node.tag == inkex.utils.addNS( 'linearGradient', 'svg' ) or node.tag == 'linearGradient':
 				# Similar in pattern
 				pass
-			elif node.tag == inkex.addNS( 'style', 'svg' ) or node.tag == 'style':
+			elif node.tag == inkex.utils.addNS( 'style', 'svg' ) or node.tag == 'style':
 				# This is a reference to an external style sheet and not the value
 				# of a style attribute to be inherited by child elements
 				pass
-			elif node.tag == inkex.addNS( 'cursor', 'svg' ) or node.tag == 'cursor':
+			elif node.tag == inkex.utils.addNS( 'cursor', 'svg' ) or node.tag == 'cursor':
 				pass
-			elif node.tag == inkex.addNS( 'color-profile', 'svg' ) or node.tag == 'color-profile':
+			elif node.tag == inkex.utils.addNS( 'color-profile', 'svg' ) or node.tag == 'color-profile':
 				# Gamma curves, color temp, etc. are not relevant to single color output
 				pass
 			elif not isinstance( node.tag, basestring ):
@@ -878,7 +869,7 @@ class LUS( inkex.Effect ):
 	def doCommand( self, cmd ):
 
 		if self.LU:  #to Line-us
-			cmd += b'\x00'
+			cmd += ''
 			response = ''
 			try:
 				self.send_cmd( cmd )
@@ -902,7 +893,7 @@ class LUS( inkex.Effect ):
 #-----------------------------------------------------------------------------------------------------
 	def doRequest( self ):
 		if self.connected:
-			self._sock.send('Hello')
+			self._sock.send(b'Hello')
 			line = self.get_resp()
 			inkex.errormsg(line)
 		return line
@@ -935,7 +926,7 @@ class LUS( inkex.Effect ):
 
 		if ( tim>990):
 			 lin ='Time_out'
-		return lin
+		return lin.decode('utf-8')
 #-----------------------------------------------------------------------------------------------------
 	def send_cmd( self, cmd ):
 		if self.LU:  #to Line-us
