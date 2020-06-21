@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from argparse import ArgumentParser, Namespace
+from inkex.utils import filename_arg
 from lxml import etree
 from bezmisc import *
 from math import sqrt
@@ -47,7 +49,7 @@ USER = os.getenv( 'USER' )
 if platform == 'win32':
 	HOME = os.path.realpath( "C:/" )  # Arguably, this should be %APPDATA% or %TEMP%
 
-Gcode_file =  os.path.join( HOME,'\\0\\0000007.txt' )
+Gcode_file =  os.path.join( HOME,'\lus-output.txt' )
 #Gcode_file =  os.path.join( HOME,'\\Users',USER,'\\Documents\\LineUsFiles\\0000007.txt' )
 
 #-----------------------------------------------------------------------------------------------------
@@ -99,6 +101,20 @@ class LUS( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
 
+		self.arg_parser = ArgumentParser(description="I do not even know")
+
+		self.arg_parser.add_argument(
+				"input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
+				help="Filename of the input file (default is stdin)", default=None)
+
+		self.arg_parser.add_argument(
+				"--output", type=str, default=None,
+				help="Optional output filename for saving the result (default is stdout).")
+
+		self.arg_parser.add_argument(
+				"--ids", default=None,
+				help="I have no idea what this is.")
+            		
 		self.arg_parser.add_argument( "--smoothness",
 			type=float,
 			dest="smoothness", default=0.1,
@@ -123,23 +139,29 @@ class LUS( inkex.Effect ):
 			type=int,
 			dest="penDownPosition", default=N_PEN_DOWN_POS,
 			help="Position when lowered" )
+
 		self.arg_parser.add_argument( "--layernumber",
 			type=int,
 			dest="layernumber", default=N_DEFAULT_LAYER,
 			help="Selected layer for multilayer plotting" )
+
 		self.arg_parser.add_argument( "--setupType",
 			type=str,
 			dest="setupType", default="controls",
 			help="The active option when Apply was pressed" )
+
 		self.arg_parser.add_argument( "--manualType",
 			type=str,
 			dest="manualType", default="controls",
 			help="The active option when Apply was pressed" )
+
 		self.arg_parser.add_argument( "--WalkDistance",
 			type=int,
 			dest="WalkDistance", default=N_WALK_DEFAULT,
 			help="Selected layer for multilayer plotting" )
 
+		self.add_arguments(self.arg_parser)
+		
 		self.PenIsUp = True
 		self.fX = None
 		self.fY = None
