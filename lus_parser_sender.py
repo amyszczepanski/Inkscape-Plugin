@@ -483,7 +483,7 @@ class LUS( inkex.Effect ):
 				a.append( [' l ', [0, h]] )
 				a.append( [' l ', [-w, 0]] )
 				a.append( [' Z', []] )
-				newpath.set( 'd', simplepath.formatPath( a ) )
+				newpath.set( 'd', str(inkex.paths.Path( a )) )
 				self.plotPath( newpath, matNew )
 
 			elif node.tag == inkex.utils.addNS( 'line', 'svg' ) or node.tag == 'line':
@@ -867,7 +867,7 @@ class LUS( inkex.Effect ):
 
 #-----------------------------------------------------------------------------------------------------
 	def doCommand( self, cmd ):
-
+# 		inkex.errormsg(sys.version)
 		if self.LU:  #to Line-us
 			cmd += ''
 			response = ''
@@ -875,7 +875,8 @@ class LUS( inkex.Effect ):
 				self.send_cmd( cmd )
 				while ( response == '' ):
 					response =  self.get_resp()
-				if ( response[0] != 'o' ):
+				# I always get the 'hello' message back, so ignoring that here
+				if ( response[0] != 'o' and response[0] != 'h'):
 					inkex.errormsg( cmd )
 					inkex.errormsg( str( response ))
 					time.sleep( 0.5 )
@@ -931,7 +932,8 @@ class LUS( inkex.Effect ):
 	def send_cmd( self, cmd ):
 		if self.LU:  #to Line-us
 			if self.connected:
-				self._sock.send(cmd)
+				# sendall instead of send because it fails more loudly than send 
+				self._sock.sendall( cmd.encode('utf-8') )
 		if self.GF:  #to Gcode file
 			self.fil.write( cmd )
 		return
