@@ -867,8 +867,8 @@ class LUS( inkex.Effect ):
 
 #-----------------------------------------------------------------------------------------------------
 	def doCommand( self, cmd ):
-# 		inkex.errormsg(sys.version)
 		if self.LU:  #to Line-us
+
 			cmd += ''
 			response = ''
 			try:
@@ -893,10 +893,12 @@ class LUS( inkex.Effect ):
 				pass
 #-----------------------------------------------------------------------------------------------------
 	def doRequest( self ):
+		line = 'Not connected'
 		if self.connected:
 			self._sock.send(b'Hello')
 			line = self.get_resp()
 			inkex.errormsg(line)
+
 		return line
 #-----------------------------------------------------------------------------------------------------
 	def connect( self ):
@@ -932,6 +934,7 @@ class LUS( inkex.Effect ):
 	def send_cmd( self, cmd ):
 		if self.LU:  #to Line-us
 			if self.connected:
+				cmd += '\n\0'
 				# sendall instead of send because it fails more loudly than send 
 				self._sock.sendall( cmd.encode('utf-8') )
 		if self.GF:  #to Gcode file
