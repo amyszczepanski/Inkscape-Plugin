@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import inkex
+from inkex.elements import Group, PathElement
 from argparse import ArgumentParser, Namespace
 from inkex.utils import filename_arg
 from lxml import etree
@@ -359,7 +361,7 @@ class LUS( inkex.Effect ):
 			if ( float(vinfo[2]) != 0 ) and ( float(vinfo[3]) != 0 ):
 				sx = self.svgWidth / float( vinfo[2] )
 				sy = self.svgHeight / float( vinfo[3] )
-				self.svgTransform = parseTransform( 'scale(%f,%f) translate(%f,%f)' % (sx, sy, -float( vinfo[0] ), -float( vinfo[1] ) ) )
+				self.svgTransform = inkex.transforms.Transform( 'scale(%f,%f) translate(%f,%f)' % (sx, sy, -float( vinfo[0] ), -float( vinfo[1] ) ) )
 		try:
 			self.recursivelyTraverseSvg( self.svg, self.svgTransform )
 					
@@ -399,7 +401,7 @@ class LUS( inkex.Effect ):
 				pass
 
 			# first apply the current matrix transform to this node's tranform
-			matNew = composeTransform( matCurrent, parseTransform( node.get( "transform" ) ) )
+			matNew =  matCurrent * inkex.transforms.Transform( node.get( "transform" ) ) 
 
 			if node.tag == inkex.utils.addNS( 'g', 'svg' ) or node.tag == 'g':
 				#self.penUp()
@@ -466,24 +468,24 @@ class LUS( inkex.Effect ):
 				# fourth side implicitly
 
 				# Create a path with the outline of the rectangle
-				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
+				newpath = PathElement()
 				x = float( node.get( 'x' ) )
 				y = float( node.get( 'y' ) )
 				w = float( node.get( 'width' ) )
 				h = float( node.get( 'height' ) )
-				s = node.get( 'style' )
-				if s:
-					newpath.set( 'style', s )
+				#s = node.get( 'style' )
+				#if s:
+				#	newpath.set( 'style', s )
 				t = node.get( 'transform' )
 				if t:
-					newpath.set( 'transform', t )
-				a = []
-				a.append( ['M ', [x, y]] )
-				a.append( [' l ', [w, 0]] )
-				a.append( [' l ', [0, h]] )
-				a.append( [' l ', [-w, 0]] )
-				a.append( [' Z', []] )
-				newpath.set( 'd', str(inkex.paths.Path( a )) )
+					newpath.apply_transform(t)
+				a = ''
+				a += 'M ' + str(x) + ' ' + str(y)
+				a += ' l ' + str(w) + ' 0'
+				a += ' l 0 ' + str(h)
+				a += ' l ' + str(-w) + ' 0'
+				a += ' Z'
+				newpath.path = a
 				self.plotPath( newpath, matNew )
 
 			elif node.tag == inkex.utils.addNS( 'line', 'svg' ) or node.tag == 'line':
@@ -774,13 +776,14 @@ class LUS( inkex.Effect ):
 
 		d = path.get( 'd' )
 
-		if len( simplepath.parsePath( d ) ) == 0:
+		if len( Path(d).to_arrays() ) == 0:
 			return
 
-		p = cubicsuperpath.parsePath( d )
+		p = inkex.paths.CubicSuperPath(inkex.paths.Path(d))
 
 		# ...and apply the transformation to each point
-		applyTransformToPath( matTransform, p )
+		#applyTransformToPath( matTransform, p )
+		Path(p).transform(Transform(matTransform)).to_arrays()
 
 		# p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
 		# where the start-point is the last point in the previous segment.
