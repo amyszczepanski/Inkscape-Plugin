@@ -501,21 +501,21 @@ class LUS( inkex.Effect ):
 				self.pathcount += 1
 
 				# Create a path to contain the line
-				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
+				newpath = PathElement()
 				x1 = float( node.get( 'x1' ) )
 				y1 = float( node.get( 'y1' ) )
 				x2 = float( node.get( 'x2' ) )
 				y2 = float( node.get( 'y2' ) )
-				s = node.get( 'style' )
-				if s:
-					newpath.set( 'style', s )
+				#s = node.get( 'style' )
+				#if s:
+					#newpath.set( 'style', s )
 				t = node.get( 'transform' )
 				if t:
 					newpath.set( 'transform', t )
-				a = []
-				a.append( ['M ', [x1, y1]] )
-				a.append( [' L ', [x2, y2]] )
-				newpath.set( 'd', simplepath.formatPath( a ) )
+				a = ''
+				a += 'M ' + str(x1) + ' ' + str(y1)
+				a += ' L ' + str(x2) + ' ' + str(y2)
+				newpath.path = a
 				self.plotPath( newpath, matNew )				
 				self.svgLastPath += 1
 				self.svgLastPathNC = self.nodeCount
@@ -548,11 +548,11 @@ class LUS( inkex.Effect ):
 				d = "M " + pa[0]
 				for i in range( 1, len( pa ) ):
 					d += " L " + pa[i]
-				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
-				newpath.set( 'd', d );
-				s = node.get( 'style' )
-				if s:
-					newpath.set( 'style', s )
+				newpath = PathElement()
+				newpath.path = d
+				#s = node.get( 'style' )
+				#if s:
+					#newpath.set( 'style', s )
 				t = node.get( 'transform' )
 				if t:
 					newpath.set( 'transform', t )
@@ -589,11 +589,11 @@ class LUS( inkex.Effect ):
 				for i in range( 1, len( pa ) ):
 					d += " L " + pa[i]
 				d += " Z"
-				newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
-				newpath.set( 'd', d );
-				s = node.get( 'style' )
-				if s:
-					newpath.set( 'style', s )
+				newpath = PathElement()
+				newpath.path = d
+				#s = node.get( 'style' )
+				#if s:
+					#newpath.set( 'style', s )
 				t = node.get( 'transform' )
 				if t:
 					newpath.set( 'transform', t )
@@ -642,11 +642,11 @@ class LUS( inkex.Effect ):
 						'0 1 0 %f,%f ' % ( x2, cy ) + \
 						'A %f,%f ' % ( rx, ry ) + \
 						'0 1 0 %f,%f' % ( x1, cy )
-					newpath = etree.Element( inkex.utils.addNS( 'path', 'svg' ) )
-					newpath.set( 'd', d );
-					s = node.get( 'style' )
-					if s:
-						newpath.set( 'style', s )
+					newpath = PathElement()
+					newpath.path = d
+					#s = node.get( 'style' )
+					#if s:
+						#newpath.set( 'style', s )
 					t = node.get( 'transform' )
 					if t:
 						newpath.set( 'transform', t )
