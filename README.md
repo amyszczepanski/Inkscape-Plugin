@@ -1,3 +1,5 @@
+NOTE: This is still broken. I can tell you what is broken if you want to fix it; I've gotten too busy to continue doing much with it.
+
 # Inkscape-Plugin
 Inkscape extension for Line-us developed by Anatoly Besplemennov
 
